@@ -14,9 +14,9 @@ function initializeEmbed() {
     return;
   }
 
-  // 1. Get attributes from the HTML container
+  // 1. Get attributes (default to empty string if null)
   const attrs = {
-    domainUrl: c.getAttribute('data-url'), // This will read "https://dev.buktor.com" from index.html
+    domainUrl: c.getAttribute('data-url'),
     otp: c.getAttribute("data-otp-required"),
     location: c.getAttribute("data-location"),
     category: c.getAttribute("data-category"),
@@ -39,15 +39,17 @@ function initializeEmbed() {
     </style>`;
   c.appendChild(loader);
 
-  // 2. Build the correct iframe URL pointing to dev.buktor.com
+  // 2. ONLY build search params for values that are NOT null or empty
+  const searchParams = new URLSearchParams();
+  if (attrs.otp) searchParams.set('data-otp-required', attrs.otp);
+  if (attrs.location) searchParams.set('data-location', attrs.location);
+  if (attrs.category) searchParams.set('data-category', attrs.category);
+  if (attrs.service) searchParams.set('data-service', attrs.service);
+  if (attrs.dateView) searchParams.set('data-date-view', attrs.dateView);
+
+  // 3. Build correct iframe URL
   const iframe = document.createElement('iframe');
-  iframe.src = `${attrs.domainUrl}/${s}/script-ui/web-embed?${new URLSearchParams({
-    'data-otp-required': attrs.otp,
-    'data-location': attrs.location,
-    'data-category': attrs.category,
-    'data-service': attrs.service,
-    'data-date-view': attrs.dateView,
-  }).toString()}`;
+  iframe.src = `${attrs.domainUrl}/${s}/script-ui/web-embed?${searchParams.toString()}`;
 
   iframe.style.cssText = 'z-index:910; height: 80vh; width:100%; border:none;';
   iframe.setAttribute('allowtransparency', 'true');
